@@ -1,0 +1,23 @@
+# Set the project language
+language: python
+
+# Set up the build matrix
+python:
+  - "2.7"
+  - "3.2"
+  - "3.3"
+  - "3.4"
+
+# Install testing dependencies (nose is pre-installed)
+install:
+  - pip install pep8
+
+# Run PEP-8 compliance testing and unit tests
+script:
+  - common/scripts/run-pep8.sh
+  - common/scripts/run-tests.sh
+
+# Send notifications
+notifications:
+  email:
+    - jacob@havoc.io
