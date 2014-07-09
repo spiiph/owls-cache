@@ -9,8 +9,8 @@ from os import makedirs
 # Six imports
 from six.moves.cPickle import dump, load
 
-# owls-core imports
-from owls_core.caching.backends import PersistentCachingBackend
+# owls-cache imports
+from owls_cache.backends import PersistentCachingBackend
 
 
 class FileSystemPersistentCachingBackend(PersistentCachingBackend):

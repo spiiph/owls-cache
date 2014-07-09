@@ -6,7 +6,7 @@
 from os import environ
 from os.path import join
 
-# owls-core imports
+# owls-cache imports
 from owls_cache.backends import TransientCachingBackend
 from owls_cache.backends.redis import RedisPersistentCachingBackend
 from owls_cache.backends.fs import FileSystemPersistentCachingBackend

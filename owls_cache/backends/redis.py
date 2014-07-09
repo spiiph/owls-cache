@@ -8,8 +8,8 @@ import logging
 # Six imports
 from six.moves.cPickle import dumps, loads
 
-# owls-core imports
-from owls_core.caching.backends import PersistentCachingBackend
+# owls-cache imports
+from owls_cache.backends import PersistentCachingBackend
 
 
 # Create a logger

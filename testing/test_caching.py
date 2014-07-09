@@ -1,8 +1,8 @@
 # System imports
 import unittest
 
-# owls-core imports
-from owls_core.caching import transiently_cached, persistently_cached
+# owls-cache imports
+from owls_cache import transiently_cached, persistently_cached
 
 
 class TestTransientCaching(unittest.TestCase):
