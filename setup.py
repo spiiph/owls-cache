@@ -20,6 +20,12 @@ setup(
     version = '0.0.1',
     packages = ['owls_cache'],
 
+    # Setup dependencies
+    install_requires = [
+        'six >= 1.7.3',
+        'redis >= 2.10.1',
+    ],
+
     # Metadata for PyPI
     author = 'Jacob Howard',
     author_email = 'jacob@havoc.io',
