@@ -8,22 +8,11 @@ import logging
 # Six imports
 from six.moves.cPickle import dumps, loads
 
+# redis imports
+import redis
+
 # owls-cache imports
-from owls_cache.backends import PersistentCachingBackend
-
-
-# Create a logger
-logger = logging.getLogger(__name__)
-
-
-# Check whether or not redis support is available
-try:
-    import redis
-    _redis_available = True
-except ImportError:
-    _redis_available = False
-    logger.warn('redis module not available, redis persistent caching '
-                'unavailable')
+from owls_cache.persistent.backends import PersistentCachingBackend
 
 
 class RedisPersistentCachingBackend(PersistentCachingBackend):
@@ -37,11 +26,6 @@ class RedisPersistentCachingBackend(PersistentCachingBackend):
 
         Args: The same as the redis.StrictRedis class
         """
-        # Check that redis is available
-        global _redis_available
-        if not _redis_available:
-            raise RuntimeError('redis support not available')
-
         # Create the client
         self._client = redis.StrictRedis(*args, **kwargs)
 
