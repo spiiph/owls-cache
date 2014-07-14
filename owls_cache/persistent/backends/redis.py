@@ -10,6 +10,7 @@ from __future__ import absolute_import
 import logging
 
 # Six imports
+from six import iteritems
 from six.moves.cPickle import dumps, loads
 
 # redis imports
@@ -54,7 +55,7 @@ class RedisPersistentCachingBackend(PersistentCachingBackend):
         key_args = ', '.join((repr(a) for a in args))
         key_kwargs = ', '.join(('{0}={1}'.format(k, repr(v))
                                 for k, v
-                                in kwargs.iteritems()))
+                                in iteritems(kwargs)))
         if key_args != '' and key_kwargs != '':
             key_args += ', '
         return '{0}({1}{2})'.format(name, key_args, key_kwargs)
