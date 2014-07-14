@@ -2,7 +2,7 @@
 from sys import path
 
 # Setuptools imports
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # owls-common imports
 path.append('common/modules')
@@ -18,7 +18,7 @@ setup(
     # Basic installation information
     name = 'owls_cache',
     version = '0.0.1',
-    packages = ['owls_cache'],
+    packages = find_packages(exclude = ['common', 'testing']),
 
     # Setup dependencies
     install_requires = [
