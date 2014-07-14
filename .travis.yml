@@ -8,6 +8,10 @@ python:
   - "3.3"
   - "3.4"
 
+# Start up redis
+services:
+  - redis-server
+
 # Install testing dependencies (nose is pre-installed) and the module itself
 # in order to get dependencies
 install:
