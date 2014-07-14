@@ -24,6 +24,7 @@ setup(
     install_requires = [
         'six >= 1.7.3',
         'redis >= 2.10.1',
+        'nose >= 1.3.3',
     ],
 
     # Metadata for PyPI

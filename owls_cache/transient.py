@@ -30,10 +30,14 @@ _caches = defaultdict(OrderedDict)
 def cached(f):
     """Creates a transiently-cached version of a function.
 
-    The function can have multiple caches associated with it, each of a
-    different size, which might generally be associated with multiple callers.
+    The function can have an unlimited number of caches associated with it -
+    one of which is the default cache and others of which can be named with the
+    added 'cache' keyword argument.  This allows users to associate caches with
+    call-sites rather than functions, and allows users of code with transient
+    caching embedded to more effectively control caching on a per-call-site
+    basis.
 
-    The resulting function will take two additional keyword arguments:
+    The resulting function will take an additional keyword argument:
 
         cache: The name of the cache in which to store objects (defaults to the
             function name).  This value must be hashable.  If None is provided,
@@ -52,14 +56,10 @@ def cached(f):
     """
     # Create the wrapper function
     def wrapper(*args, **kwargs):
-        # Switch to the global cache variables
-        global _caches
-        global _cache_limits
-
         # Extract keyword argument if specified
         cache_name = kwargs.get('cache', f.__name__)
 
-        # Mask these arguments from the underlying function
+        # Mask this argument from the underlying function
         if 'cache' in kwargs:
             del kwargs['cache']
 
@@ -101,8 +101,4 @@ def cached(f):
 def clear_transient_caches():
     """Clears all transient caches.
     """
-    # Switch to the global variable
-    global _caches
-
-    # Empty it
     _caches.clear()

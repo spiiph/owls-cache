@@ -39,17 +39,36 @@ class FileSystemPersistentCachingBackend(PersistentCachingBackend):
         # Store the path
         self._path = path
 
-    def _path_for_key(self, key):
-        """Returns the full path corresponding to the given key, which may or
-        may not exist.
+    def key(self, name, args, kwargs):
+        """Return a suitable string for caching a function with the given name
+        and specified arguments.
+
+        Since we are using the filesystem, it makes sense to return a key which
+        is a path.  Thus the following format is used:
+
+            {cache_directory}/{base_key}.pickle
+
+        Where {base_key} is the value returned from
+        PersistentCachingBackend.key.
 
         Args:
-            key: The key to convert
+            name: The name of the callable being cached
+            args: The positional arguments to the callable
+            kwargs: The keyword arguments to the callable
 
         Returns:
-            A file name suitable for on-disk encoding.
+            A (string) key suitable to use as the cache key.
         """
-        return join(self._path, '{0}.pickle'.format(hash(key)))
+        return join(
+            self._path,
+            '{0}.pickle'.format(
+                super(FileSystemPersistentCachingBackend, self).key(
+                    name,
+                    args,
+                    kwargs
+                )
+            )
+        )
 
     def set(self, key, value):
         """Sets the cache value for a given key, overwriting any previous
@@ -60,7 +79,7 @@ class FileSystemPersistentCachingBackend(PersistentCachingBackend):
             value: The value to set
         """
         # Open the file and write the data
-        with open(self._path_for_key(key), 'wb') as f:
+        with open(key, 'wb') as f:
             dump(value, f, protocol = 2)
 
     def get(self, key):
@@ -72,18 +91,10 @@ class FileSystemPersistentCachingBackend(PersistentCachingBackend):
         Returns:
             The associated value, or None if the key is not found.
         """
-        # Compute the path for the key
-        key_path = self._path_for_key(key)
-
         # Check if it exists and whether or not it's a file
-        if not exists(key_path) or not isfile(key_path):
+        if not exists(key) or not isfile(key):
             return None
 
         # Try to load it
-        # NOTE: I don't normally like catch-alls, but there is a big stack here
-        # and a lot of things could go wrong
-        try:
-            with open(key_path, 'rb') as f:
-                return load(f)
-        except:
-            return None
+        with open(key, 'rb') as f:
+            return load(f)

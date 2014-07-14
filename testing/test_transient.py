@@ -2,8 +2,12 @@
 import unittest
 
 # owls-cache imports
-from owls_cache.transient import cached as transiently_cached, \
-    clear_transient_caches
+from owls_cache.transient import set_cache_limit, \
+    cached as transiently_cached, clear_transient_caches
+
+
+# Set transient cache limits, just for kicks
+set_cache_limit('abc', 2)
 
 
 class TestTransientBase(unittest.TestCase):

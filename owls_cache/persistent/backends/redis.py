@@ -2,6 +2,10 @@
 """
 
 
+# HACK: Use absolute_import behavior to get around module having the same name
+# as the global redis module
+from __future__ import absolute_import
+
 # System imports
 import logging
 
@@ -29,6 +33,32 @@ class RedisPersistentCachingBackend(PersistentCachingBackend):
         # Create the client
         self._client = redis.StrictRedis(*args, **kwargs)
 
+    def key(self, name, args, kwargs):
+        """Return a suitable string for caching a function with the given name
+        and specified arguments.
+
+        Since redis is less restrictive in its key space, the following format
+        is used:
+
+            function_name(arg1, ..., argN, kwarg1 = val1, ..., kwargM = valM)
+
+        Args:
+            name: The name of the callable being cached
+            args: The positional arguments to the callable
+            kwargs: The keyword arguments to the callable
+
+        Returns:
+            A (string) key suitable to use as the cache key.
+        """
+        # Create a human-readable key based on function name and arguments
+        key_args = ', '.join((repr(a) for a in args))
+        key_kwargs = ', '.join(('{0}={1}'.format(k, repr(v))
+                                for k, v
+                                in kwargs.iteritems()))
+        if key_args != '' and key_kwargs != '':
+            key_args += ', '
+        return '{0}({1}{2})'.format(name, key_args, key_kwargs)
+
     def set(self, key, value):
         """Sets the cache value for a given key, overwriting any previous
         value set for that key.
@@ -54,9 +84,4 @@ class RedisPersistentCachingBackend(PersistentCachingBackend):
             return None
 
         # Deserialize it
-        # NOTE: I don't normally like catch-alls, but there is a big stack here
-        # and a lot of things could go wrong
-        try:
-            return loads(cache_value)
-        except:
-            return None
+        return loads(cache_value)
