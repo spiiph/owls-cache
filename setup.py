@@ -20,7 +20,7 @@ setup(
     version = '0.0.1',
     packages = find_packages(exclude = ['common', 'testing']),
 
-    # Setup dependencies
+    # Dependencies
     install_requires = [
         'six >= 1.7.3',
         'redis >= 2.10.1',
