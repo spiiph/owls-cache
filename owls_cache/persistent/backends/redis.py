@@ -51,7 +51,7 @@ class RedisPersistentCachingBackend(PersistentCachingBackend):
         """
         # Recreate the client
         self._args, self._kwargs = state
-        self._client = redis.StrictRedis(*args, **kwargs)
+        self._client = redis.StrictRedis(*self._args, **self._kwargs)
 
     def key(self, name, args, kwargs):
         """Return a suitable string for caching a function with the given name

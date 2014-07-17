@@ -4,6 +4,9 @@ from tempfile import mkdtemp
 from os import makedirs
 from shutil import rmtree
 
+# Six imports
+from six.moves.cPickle import dumps, loads
+
 # owls-cache imports
 from owls_cache.persistent import cached as persistently_cached, \
     set_persistent_cache
@@ -105,6 +108,15 @@ class TestRedisBase(TestPersistentBase):
 
         # Unset the global persistent cache
         set_persistent_cache(None)
+
+
+@unittest.skipIf(not redis_available, 'redis unavailable on localhost:6379')
+class TestRedisPickle(TestRedisBase):
+    def test(self):
+        # Test that we can pickle and use the redis backend
+        pickled = dumps(redis_backend)
+        unpickled = loads(pickled)
+        self.assertEqual(unpickled.get('dummy'), None)
 
 
 @unittest.skipIf(not redis_available, 'redis unavailable on localhost:6379')
