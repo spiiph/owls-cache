@@ -10,16 +10,15 @@ from os import makedirs
 from six.moves.cPickle import dump, load
 
 # owls-cache imports
-from owls_cache.persistent.backends import PersistentCachingBackend
+from owls_cache.persistent.caches import PersistentCache
 
 
-class FileSystemPersistentCachingBackend(PersistentCachingBackend):
+class FileSystemPersistentCache(PersistentCache):
     """Implements a persistent cache on the file system.
     """
 
     def __init__(self, path):
-        """Initializes a new instance of the
-        FileSystemPersistentCachingBackend.
+        """Initializes a new instance of the FileSystemPersistentCache.
 
         This method will raise an exception if the specified path exists and is
         not a directory, or if directory creation fails.
@@ -62,7 +61,7 @@ class FileSystemPersistentCachingBackend(PersistentCachingBackend):
         return join(
             self._path,
             '{0}.pickle'.format(
-                super(FileSystemPersistentCachingBackend, self).key(
+                super(FileSystemPersistentCache, self).key(
                     name,
                     args,
                     kwargs

@@ -10,18 +10,19 @@ from six.moves.cPickle import dumps, loads
 # owls-cache imports
 from owls_cache.persistent import cached as persistently_cached, \
     set_persistent_cache
-from owls_cache.persistent.backends.fs import \
-    FileSystemPersistentCachingBackend
-from owls_cache.persistent.backends.redis import RedisPersistentCachingBackend
+from owls_cache.persistent.caches.fs import \
+    FileSystemPersistentCache
+from owls_cache.persistent.caches.redis import RedisPersistentCache
 
 
 # Create a filesystem backend
-fs_backend = FileSystemPersistentCachingBackend(mkdtemp())
+fs_backend = FileSystemPersistentCache(mkdtemp())
 
 
 # Create a redis backend and add it to the list if redis is available
-redis_backend = RedisPersistentCachingBackend()
+redis_backend = RedisPersistentCache()
 redis_available = True
+redis_unavailable_message = 'redis unavailable on localhost:6379'
 try:
     redis_backend.get('dummy')
 except:
@@ -92,7 +93,7 @@ class TestFileSystemSkip(TestFileSystemBase):
         self.assertEqual(value_1, value_1_uncached)
 
 
-@unittest.skipIf(not redis_available, 'redis unavailable on localhost:6379')
+@unittest.skipIf(not redis_available, redis_unavailable_message)
 class TestRedisBase(TestPersistentBase):
     def setUp(self):
         # Call the base initialization
@@ -110,7 +111,7 @@ class TestRedisBase(TestPersistentBase):
         set_persistent_cache(None)
 
 
-@unittest.skipIf(not redis_available, 'redis unavailable on localhost:6379')
+@unittest.skipIf(not redis_available, redis_unavailable_message)
 class TestRedisPickle(TestRedisBase):
     def test(self):
         # Test that we can pickle and use the redis backend
@@ -119,7 +120,7 @@ class TestRedisPickle(TestRedisBase):
         self.assertEqual(unpickled.get('dummy'), None)
 
 
-@unittest.skipIf(not redis_available, 'redis unavailable on localhost:6379')
+@unittest.skipIf(not redis_available, redis_unavailable_message)
 class TestRedisMiss(TestRedisBase):
     def test(self):
         # Run some computations which should be cache misses
@@ -130,7 +131,7 @@ class TestRedisMiss(TestRedisBase):
         self.assertEqual(self._counter, 2)
 
 
-@unittest.skipIf(not redis_available, 'redis unavailable on localhost:6379')
+@unittest.skipIf(not redis_available, redis_unavailable_message)
 class TestRedisHit(TestRedisBase):
     def test(self):
         # Run a computation which should trigger a cache miss
@@ -142,7 +143,7 @@ class TestRedisHit(TestRedisBase):
         self.assertEqual(value_1, value_1_cached)
 
 
-@unittest.skipIf(not redis_available, 'redis unavailable on localhost:6379')
+@unittest.skipIf(not redis_available, redis_unavailable_message)
 class TestRedisSkip(TestRedisBase):
     def test(self):
         # Run a computation which should trigger a cache miss

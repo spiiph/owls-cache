@@ -17,7 +17,7 @@ def set_persistent_cache(cache):
 
     Args:
         cache: An instance of a subclass of
-            owls_cache.persistent.backends.PersistentCachingBackend
+            owls_cache.persistent.caches.PersistentCache
     """
     # Switch to the global variable
     global _persistent_cache
@@ -46,7 +46,7 @@ def cached(f):
     The resulting function will take an additional keyword argument:
 
         cache: An instance of a subclass of
-            owls_cache.persistent.backends.PersistentCachingBackend
+            owls_cache.persistent.caches.PersistentCache
 
     For caching to succeed, you must call the function with the same arg/kwarg
     structure (i.e. you will get a cache miss if you use an argument as a

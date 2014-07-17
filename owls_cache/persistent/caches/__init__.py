@@ -1,4 +1,4 @@
-"""Provides the base persistent cache backend class.
+"""Provides the base persistent cache class.
 """
 
 
@@ -6,7 +6,7 @@
 from collections import OrderedDict
 
 
-class PersistentCachingBackend(object):
+class PersistentCache(object):
     """The base caching backend.  This backend should be subclasses by concrete
     implementations.
     """

@@ -17,15 +17,15 @@ from six.moves.cPickle import dumps, loads
 import redis
 
 # owls-cache imports
-from owls_cache.persistent.backends import PersistentCachingBackend
+from owls_cache.persistent.caches import PersistentCache
 
 
-class RedisPersistentCachingBackend(PersistentCachingBackend):
+class RedisPersistentCache(PersistentCache):
     """Implements a persistent cache in a redis key-value store.
     """
 
     def __init__(self, *args, **kwargs):
-        """Initializes a new instance of the RedisPersistentCachingBackend.
+        """Initializes a new instance of the RedisPersistentCache.
 
         This method will raise an exception if redis support is unavailable.
 
