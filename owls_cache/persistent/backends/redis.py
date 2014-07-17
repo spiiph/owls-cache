@@ -31,7 +31,26 @@ class RedisPersistentCachingBackend(PersistentCachingBackend):
 
         Args: The same as the redis.StrictRedis class
         """
+        # Store creation arguments for pickling
+        self._args = args
+        self._kwargs = kwargs
+
         # Create the client
+        self._client = redis.StrictRedis(*args, **kwargs)
+
+    def __getstate__(self):
+        """Returns a reconstructable state for pickling.
+        """
+        return (self._args, self._kwargs)
+
+    def __setstate__(self, state):
+        """Sets the object state from pickling information.
+
+        Args:
+            state: The object state
+        """
+        # Recreate the client
+        self._args, self._kwargs = state
         self._client = redis.StrictRedis(*args, **kwargs)
 
     def key(self, name, args, kwargs):
