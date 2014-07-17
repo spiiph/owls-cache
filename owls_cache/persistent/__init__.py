@@ -26,6 +26,15 @@ def set_persistent_cache(cache):
     _persistent_cache = cache
 
 
+def get_persistent_cache():
+    """Gets the global persistent cache.
+
+    Returns:
+        The global persistent cache, or None if the global cache is not set.
+    """
+    return _persistent_cache
+
+
 def cached(f):
     """Creates a persistently-cached version of a function.
 
