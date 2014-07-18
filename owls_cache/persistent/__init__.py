@@ -1,6 +1,7 @@
 # System imports
 from os import environ
 from os.path import join
+from functools import wraps
 
 
 # Global persistent cache
@@ -60,6 +61,7 @@ def cached(f):
         A cached version of the callable.
     """
     # Create the wrapper function
+    @wraps(f)
     def wrapper(*args, **kwargs):
         # Extract keyword argument if specified
         cache = kwargs.get('cache', _persistent_cache)

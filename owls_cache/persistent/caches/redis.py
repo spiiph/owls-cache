@@ -27,8 +27,6 @@ class RedisPersistentCache(PersistentCache):
     def __init__(self, *args, **kwargs):
         """Initializes a new instance of the RedisPersistentCache.
 
-        This method will raise an exception if redis support is unavailable.
-
         Args: The same as the redis.StrictRedis class
         """
         # Store creation arguments for pickling

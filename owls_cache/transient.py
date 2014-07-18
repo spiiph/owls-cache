@@ -4,6 +4,7 @@
 
 # System imports
 from collections import defaultdict, OrderedDict
+from functools import wraps
 
 
 # Global size limits for caches
@@ -55,6 +56,7 @@ def cached(f):
         A cached version of the callable.
     """
     # Create the wrapper function
+    @wraps
     def wrapper(*args, **kwargs):
         # Extract keyword argument if specified
         cache_name = kwargs.get('cache', f.__name__)

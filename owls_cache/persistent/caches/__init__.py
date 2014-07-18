@@ -7,7 +7,7 @@ from collections import OrderedDict
 
 
 class PersistentCache(object):
-    """The base caching backend.  This backend should be subclasses by concrete
+    """The base caching backend.  This backend should be subclassed by concrete
     implementations.
     """
 
