@@ -56,7 +56,7 @@ def cached(f):
         A cached version of the callable.
     """
     # Create the wrapper function
-    @wraps
+    @wraps(f)
     def wrapper(*args, **kwargs):
         # Extract keyword argument if specified
         cache_name = kwargs.get('cache', f.__name__)
