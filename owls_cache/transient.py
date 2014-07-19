@@ -41,7 +41,7 @@ def cached(f):
     The resulting function will take an additional keyword argument:
 
         cache: The name of the cache in which to store objects (defaults to the
-            function name).  This value must be hashable.  If None is provided,
+            function name).  This value must be a string.  If None is provided,
             then caching is disabled for that call.
 
     For caching to succeed, you must call the function with the same arg/kwarg
