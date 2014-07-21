@@ -20,7 +20,7 @@ fs_backend = FileSystemPersistentCache(mkdtemp())
 
 
 # Create a redis backend and add it to the list if redis is available
-redis_backend = RedisPersistentCache()
+redis_backend = RedisPersistentCache(prefix = 'testing')
 redis_available = True
 redis_unavailable_message = 'redis unavailable on localhost:6379'
 try:

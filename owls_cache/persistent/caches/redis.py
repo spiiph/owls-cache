@@ -27,8 +27,27 @@ class RedisPersistentCache(PersistentCache):
     def __init__(self, *args, **kwargs):
         """Initializes a new instance of the RedisPersistentCache.
 
-        Args: The same as the redis.StrictRedis class
+        Args: The same as the redis.StrictRedis class, with an additional
+            keyword argument:
+            prefix: A prefix to append to all keys in the persistent cache.  If
+                provided, it will have a dash appended to it, so keys will be
+                of the form:
+
+                    prefix-...
+
+                If None (the default), no prefix is used.
         """
+        # Check for a prefix arguments
+        prefix = kwargs.get('prefix', None)
+        if prefix is None:
+            self._prefix = ''
+        else:
+            self._prefix = '{0}-'.format(prefix)
+
+        # Mask the prefix argument from StrictRedis
+        if 'prefix' in kwargs:
+            kwargs.pop('prefix')
+
         # Store creation arguments for pickling
         self._args = args
         self._kwargs = kwargs
@@ -39,7 +58,7 @@ class RedisPersistentCache(PersistentCache):
     def __getstate__(self):
         """Returns a reconstructable state for pickling.
         """
-        return (self._args, self._kwargs)
+        return (self._args, self._kwargs, self._prefix)
 
     def __setstate__(self, state):
         """Sets the object state from pickling information.
@@ -48,7 +67,7 @@ class RedisPersistentCache(PersistentCache):
             state: The object state
         """
         # Recreate the client
-        self._args, self._kwargs = state
+        self._args, self._kwargs, self._prefix = state
         self._client = redis.StrictRedis(*self._args, **self._kwargs)
 
     def key(self, name, args, kwargs):
@@ -75,7 +94,10 @@ class RedisPersistentCache(PersistentCache):
                                 in iteritems(kwargs)))
         if key_args != '' and key_kwargs != '':
             key_args += ', '
-        return '{0}({1}{2})'.format(name, key_args, key_kwargs)
+        return '{0}{1}({2}{3})'.format(self._prefix,
+                                       name,
+                                       key_args,
+                                       key_kwargs)
 
     def set(self, key, value):
         """Sets the cache value for a given key, overwriting any previous
