@@ -88,6 +88,7 @@ def cached(f):
         # Cache the value
         cache.set(key, result)
 
+        # All done
         return result
 
     # Return the wrapper function
