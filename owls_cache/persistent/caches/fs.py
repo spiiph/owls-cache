@@ -3,7 +3,7 @@
 
 
 # System imports
-from os.path import exists, isdir, isfile, join
+from os.path import exists, isdir, isfile, join, expanduser
 from os import makedirs
 
 # Six imports
@@ -17,15 +17,20 @@ class FileSystemPersistentCache(PersistentCache):
     """Implements a persistent cache on the file system.
     """
 
-    def __init__(self, path):
+    def __init__(self, path = None):
         """Initializes a new instance of the FileSystemPersistentCache.
 
         This method will raise an exception if the specified path exists and is
         not a directory, or if directory creation fails.
 
         Args:
-            path: The path in which to store cached items
+            path: The path in which to store cached items.  If None (the
+                default), `~/.owls-cache` will be used.
         """
+        # Use home-based path if path unavailable
+        if path is None:
+            path = join(expanduser("~"), '.owls-cache')
+
         # Check that the path does not exist (and create it) or that it does
         # exist and that it is a directory
         if exists(path):
