@@ -37,7 +37,7 @@ class PersistentCache(object):
             key: The (string) key to update
             value: The (object) value to set
         """
-        raise RuntimeError('abstract method')
+        raise NotImplementedError
 
     def get(self, key):
         """Gets the cache value for a given key, if any.
@@ -48,4 +48,4 @@ class PersistentCache(object):
         Returns:
             The associated value, or None if the key is not found.
         """
-        raise RuntimeError('abstract method')
+        raise NotImplementedError
