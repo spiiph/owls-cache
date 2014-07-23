@@ -64,7 +64,7 @@ def cached(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
         # Extract keyword argument if specified
-        cache = kwargs.get('cache', _persistent_cache)
+        cache = kwargs.get('cache', get_persistent_cache())
 
         # Mask this argument from the underlying function
         if 'cache' in kwargs:
