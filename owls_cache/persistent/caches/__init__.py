@@ -11,9 +11,9 @@ class PersistentCache(object):
     implementations.
     """
 
-    def key(self, name, args, kwargs):
-        """Return a suitable string for caching a function with the given name
-        and specified arguments.
+    def key(self, name, key):
+        """Return a string suitable for use as a cache key, based on the name
+        of the callable and the argument key provided by the callable.
 
         Implementations need not override this method, as the given key should
         be suitable in most cases.  Implementations may however wish to
@@ -21,13 +21,12 @@ class PersistentCache(object):
 
         Args:
             name: The name of the callable being cached
-            args: The positional arguments to the callable
-            kwargs: The keyword arguments to the callable
+            key: The argument key provided by the callable's cache mapper
 
         Returns:
             A (string) key suitable to use as the cache key.
         """
-        return '{0}_{1}'.format(name, hash(repr(args) + repr(kwargs)))
+        return str(hash(name) + hash(key))
 
     def set(self, key, value):
         """Sets the cache value for a given key, overwriting any previous

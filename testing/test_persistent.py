@@ -34,7 +34,8 @@ class TestPersistentBase(unittest.TestCase):
         # Create a counter to check cache misses
         self._counter = 0
 
-    @persistently_cached
+    @persistently_cached('test_function',
+                         lambda s, a, b, o: (a, b, o))
     def do_computation(self, a, b, operation = 'add'):
         self._counter += 1
         return (a + b) if operation == 'add' else (a - b)

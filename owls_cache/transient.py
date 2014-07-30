@@ -11,7 +11,7 @@ import logging
 from six import iteritems
 
 
-# Global transient caching logger and disable debug by default
+# Global transient caching logger (with debug disabled by default)
 _cache_log = logging.getLogger(__name__)
 _cache_log.setLevel(logging.INFO)
 
@@ -95,10 +95,12 @@ def cached(name, mapper):
 
             # Check if caching is disabled
             if cache_name is None:
-                _cache_log.debug('caching disabled in {0} for {1!r}'.format(
-                    name,
-                    key
-                ))
+                _cache_log.debug(
+                    'transient caching disabled in {0} for {1!r}'.format(
+                        name,
+                        key
+                    )
+                )
                 return f(*args, **kwargs)
 
             # Grab the cache
@@ -114,7 +116,7 @@ def cached(name, mapper):
                 cache[key] = cache.pop(key)
 
                 # Log the cache it
-                _cache_log.debug('cache hit in {0} for {1!r}'.format(
+                _cache_log.debug('transient cache hit in {0} for {1!r}'.format(
                     cache_name,
                     key
                 ))
@@ -123,7 +125,7 @@ def cached(name, mapper):
                 return result
 
             # Log the cache miss
-            _cache_log.debug('cache miss in {0} for {1!r}'.format(
+            _cache_log.debug('transient cache miss in {0} for {1!r}'.format(
                 cache_name,
                 key
             ))

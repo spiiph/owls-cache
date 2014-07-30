@@ -43,9 +43,9 @@ class FileSystemPersistentCache(PersistentCache):
         # Store the path
         self._path = path
 
-    def key(self, name, args, kwargs):
-        """Return a suitable string for caching a function with the given name
-        and specified arguments.
+    def key(self, name, key):
+        """Return a string suitable for use as a cache key, based on the name
+        of the callable and the argument key provided by the callable.
 
         Since we are using the filesystem, it makes sense to return a key which
         is a path.  Thus the following format is used:
@@ -57,8 +57,7 @@ class FileSystemPersistentCache(PersistentCache):
 
         Args:
             name: The name of the callable being cached
-            args: The positional arguments to the callable
-            kwargs: The keyword arguments to the callable
+            key: The argument key provided by the callable's cache mapper
 
         Returns:
             A (string) key suitable to use as the cache key.
@@ -66,11 +65,7 @@ class FileSystemPersistentCache(PersistentCache):
         return join(
             self._path,
             '{0}.pickle'.format(
-                super(FileSystemPersistentCache, self).key(
-                    name,
-                    args,
-                    kwargs
-                )
+                super(FileSystemPersistentCache, self).key(name, key)
             )
         )
 

@@ -70,34 +70,23 @@ class RedisPersistentCache(PersistentCache):
         self._args, self._kwargs, self._prefix = state
         self._client = redis.StrictRedis(*self._args, **self._kwargs)
 
-    def key(self, name, args, kwargs):
-        """Return a suitable string for caching a function with the given name
-        and specified arguments.
+    def key(self, name, key):
+        """Return a string suitable for use as a cache key, based on the name
+        of the callable and the argument key provided by the callable.
 
         Since redis is less restrictive in its key space, the following format
         is used:
 
-            function_name(arg1, ..., argN, kwarg1 = val1, ..., kwargM = valM)
+            name(...key contents...)
 
         Args:
             name: The name of the callable being cached
-            args: The positional arguments to the callable
-            kwargs: The keyword arguments to the callable
+            key: The argument key provided by the callable's cache mapper
 
         Returns:
             A (string) key suitable to use as the cache key.
         """
-        # Create a human-readable key based on function name and arguments
-        key_args = ', '.join((repr(a) for a in args))
-        key_kwargs = ', '.join(('{0}={1}'.format(k, repr(v))
-                                for k, v
-                                in iteritems(kwargs)))
-        if key_args != '' and key_kwargs != '':
-            key_args += ', '
-        return '{0}{1}({2}{3})'.format(self._prefix,
-                                       name,
-                                       key_args,
-                                       key_kwargs)
+        return '{0}{1!r}'.format(name, key)
 
     def set(self, key, value):
         """Sets the cache value for a given key, overwriting any previous
