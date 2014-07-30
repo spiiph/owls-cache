@@ -47,12 +47,12 @@ def set_cache_limit(name, limit):
 _caches = defaultdict(OrderedDict)
 
 
-def cached(f):
-    """Creates a transiently-cached version of a function.
+def cached(name, mapper):
+    """Decorator to create a transiently-cached version of a function.
 
     The function can have an unlimited number of caches associated with it -
     one of which is the default cache and others of which can be named with the
-    added 'cache' keyword argument.  This allows users to associate caches with
+    added `cache` keyword argument.  This allows users to associate caches with
     call-sites rather than functions, and allows users of code with transient
     caching embedded to more effectively control caching on a per-call-site
     basis.
@@ -69,70 +69,84 @@ def cached(f):
     impossible to solve in the general case).
 
     Args:
-        f: The callable to cache
+        name: A unique name to use for the transient cache (note that this may
+            be overridden by the `cache` keyword argument)
+        mapper: A function which accepts the same arguments as the underlying
+            function and maps them to a `hash`able and `repr`able tuple
+            representing the cache key
 
     Returns:
         A cached version of the callable.
     """
-    # Create the wrapper function
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        # Extract keyword argument if specified
-        cache_name = kwargs.get('cache', f.__name__)
+    # Create the decorator
+    def decorator(f):
+        # Create the wrapper function
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            # Extract keyword argument if specified
+            cache_name = kwargs.get('cache', name)
 
-        # Mask this argument from the underlying function
-        if 'cache' in kwargs:
-            del kwargs['cache']
+            # Mask this argument from the underlying function
+            if 'cache' in kwargs:
+                del kwargs['cache']
 
-        # Create a representation of the arguments which we can use for the
-        # cache key and also for debug logging
-        key_args = ', '.join((repr(a) for a in args))
-        key_kwargs = ', '.join(('{0}={1}'.format(k, repr(v))
-                                for k, v
-                                in iteritems(kwargs)))
-        if key_args != '' and key_kwargs != '':
-            key_args += ', '
-        call_repr = '{0}({1}{2})'.format(f.__name__, key_args, key_kwargs)
+            # Compute the cache key
+            key = mapper(*args, **kwargs)
 
-        # Check if caching is disabled
-        if cache_name is None:
-            _cache_log.debug('caching disabled for %s', call_repr)
-            return f(*args, **kwargs)
+            # Check if caching is disabled
+            if cache_name is None:
+                _cache_log.debug('caching disabled in {0} for {1!r}'.format(
+                    name,
+                    key
+                ))
+                return f(*args, **kwargs)
 
-        # Grab the cache
-        cache = _caches[cache_name]
+            # Grab the cache
+            cache = _caches[cache_name]
 
-        # Grab the maximum cache size
-        cache_limit = _cache_limits[cache_name]
+            # Grab the maximum cache size
+            cache_limit = _cache_limits[cache_name]
 
-        # Compute the cache key
-        key = hash(call_repr)
+            # Check if we have a cache hit
+            result = cache.get(key)
+            if result is not None:
+                # If we have a cache hit then set the result as the most recent
+                cache[key] = cache.pop(key)
 
-        # Check if we have a cache hit
-        result = cache.get(key)
-        if result is not None:
-            _cache_log.debug('cache hit in %s for %s', cache_name, call_repr)
+                # Log the cache it
+                _cache_log.debug('cache hit in {0} for {1!r}'.format(
+                    cache_name,
+                    key
+                ))
+
+                # All done
+                return result
+
+            # Log the cache miss
+            _cache_log.debug('cache miss in {0} for {1!r}'.format(
+                cache_name,
+                key
+            ))
+
+            # If not, do the hard work
+            result = f(*args, **kwargs)
+
+            # Shrink the cache to accomodate
+            if cache_limit is not None:
+                while len(cache) >= cache_limit:
+                    cache.popitem(last = False)
+
+            # Cache the value
+            cache[key] = result
+
+            # All done
             return result
 
-        # Log the cache miss
-        _cache_log.debug('cache miss in %s for %s', cache_name, call_repr)
+        # Return the wrapper function
+        return wrapper
 
-        # If not, do the hard work
-        result = f(*args, **kwargs)
-
-        # Shrink the cache to accomodate
-        if cache_limit is not None:
-            while len(cache) >= cache_limit:
-                cache.popitem(last = False)
-
-        # Cache the value
-        cache[key] = result
-
-        # All done
-        return result
-
-    # Return the wrapper function
-    return wrapper
+    # Return the decorator
+    return decorator
 
 
 def clear_transient_caches():
