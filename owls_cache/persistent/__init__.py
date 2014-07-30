@@ -74,8 +74,9 @@ def cached(name, mapper):
         name: A unique name by which to refer to the callable in the persistent
             cache
         mapper: A function which accepts the same arguments as the underlying
-            function and maps them to a `hash`able and `repr`able tuple
-            representing the cache key
+            function and maps them to a tuple of representations (i.e. the
+            results of `repr`) or hashable values which should be used as the
+            cache key (usually calling repr on each argument is sufficient)
 
     Returns:
         A cached version of the callable.
@@ -95,12 +96,18 @@ def cached(name, mapper):
             # Compute the argument key
             argument_key = mapper(*args, **kwargs)
 
+            # Compute a nice representation of the key assuming all key
+            # elements are `repr` results
+            argument_key_repr = '({0})'.format(
+                ', '.join((str(x) for x in argument_key))
+            )
+
             # Check if caching is disabled
             if cache is None:
                 _cache_log.debug(
-                    'persistent caching disabled in {0} for {1!r}'.format(
+                    'persistent caching disabled in {0} for {1}'.format(
                         name,
-                        argument_key
+                        argument_key_repr
                     )
                 )
                 return f(*args, **kwargs)
@@ -112,17 +119,17 @@ def cached(name, mapper):
             result = cache.get(key)
             if result is not None:
                 _cache_log.debug(
-                    'persistent cache hit in {0} for {1!r}'.format(
+                    'persistent cache hit in {0} for {1}'.format(
                         name,
-                        argument_key
+                        argument_key_repr
                     )
                 )
                 return result
 
             # Log the cache miss
-            _cache_log.debug('persistent cache miss in {0} for {1!r}'.format(
+            _cache_log.debug('persistent cache miss in {0} for {1}'.format(
                 name,
-                argument_key
+                argument_key_repr
             ))
 
             # If not, do the hard work

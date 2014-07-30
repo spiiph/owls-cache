@@ -86,7 +86,7 @@ class RedisPersistentCache(PersistentCache):
         Returns:
             A (string) key suitable to use as the cache key.
         """
-        return '{0}{1!r}'.format(name, key)
+        return '{0}({1})'.format(name, ', '.join((str(x) for x in key)))
 
     def set(self, key, value):
         """Sets the cache value for a given key, overwriting any previous

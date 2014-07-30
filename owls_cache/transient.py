@@ -72,8 +72,9 @@ def cached(name, mapper):
         name: A unique name to use for the transient cache (note that this may
             be overridden by the `cache` keyword argument)
         mapper: A function which accepts the same arguments as the underlying
-            function and maps them to a `hash`able and `repr`able tuple
-            representing the cache key
+            function and maps them to a tuple of representations (i.e. the
+            results of `repr`) or hashable values which should be used as the
+            cache key (usually calling repr on each argument is sufficient)
 
     Returns:
         A cached version of the callable.
@@ -93,12 +94,16 @@ def cached(name, mapper):
             # Compute the cache key
             key = mapper(*args, **kwargs)
 
+            # Compute a nice representation of the key assuming all key
+            # elements are `repr` results
+            key_repr = '({0})'.format(', '.join((str(x) for x in key)))
+
             # Check if caching is disabled
             if cache_name is None:
                 _cache_log.debug(
-                    'transient caching disabled in {0} for {1!r}'.format(
+                    'transient caching disabled in {0} for {1}'.format(
                         name,
-                        key
+                        key_repr
                     )
                 )
                 return f(*args, **kwargs)
@@ -116,18 +121,18 @@ def cached(name, mapper):
                 cache[key] = cache.pop(key)
 
                 # Log the cache it
-                _cache_log.debug('transient cache hit in {0} for {1!r}'.format(
+                _cache_log.debug('transient cache hit in {0} for {1}'.format(
                     cache_name,
-                    key
+                    key_repr
                 ))
 
                 # All done
                 return result
 
             # Log the cache miss
-            _cache_log.debug('transient cache miss in {0} for {1!r}'.format(
+            _cache_log.debug('transient cache miss in {0} for {1}'.format(
                 cache_name,
-                key
+                key_repr
             ))
 
             # If not, do the hard work
