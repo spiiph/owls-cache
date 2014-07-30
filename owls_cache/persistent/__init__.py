@@ -65,18 +65,12 @@ def cached(name, mapper):
         cache: An instance of a subclass of
             owls_cache.persistent.caches.PersistentCache
 
-    For caching to succeed, you must call the function with the same arg/kwarg
-    structure (i.e. you will get a cache miss if you use an argument as a
-    positional argument and then later as a keyword argument - this is
-    impossible to solve in the general case).
-
     Args:
         name: A unique name by which to refer to the callable in the persistent
             cache
         mapper: A function which accepts the same arguments as the underlying
-            function and maps them to a tuple of representations (i.e. the
-            results of `repr`) or hashable values which should be used as the
-            cache key (usually calling repr on each argument is sufficient)
+            function and maps them to a tuple of values (which will be 'hashed'
+            using `repr`) to act as the cache key
 
     Returns:
         A cached version of the callable.
@@ -94,20 +88,14 @@ def cached(name, mapper):
                 del kwargs['cache']
 
             # Compute the argument key
-            argument_key = mapper(*args, **kwargs)
-
-            # Compute a nice representation of the key assuming all key
-            # elements are `repr` results
-            argument_key_repr = '({0})'.format(
-                ', '.join((str(x) for x in argument_key))
-            )
+            argument_key = repr(mapper(*args, **kwargs))
 
             # Check if caching is disabled
             if cache is None:
                 _cache_log.debug(
                     'persistent caching disabled in {0} for {1}'.format(
                         name,
-                        argument_key_repr
+                        argument_key
                     )
                 )
                 return f(*args, **kwargs)
@@ -121,7 +109,7 @@ def cached(name, mapper):
                 _cache_log.debug(
                     'persistent cache hit in {0} for {1}'.format(
                         name,
-                        argument_key_repr
+                        argument_key
                     )
                 )
                 return result
@@ -129,7 +117,7 @@ def cached(name, mapper):
             # Log the cache miss
             _cache_log.debug('persistent cache miss in {0} for {1}'.format(
                 name,
-                argument_key_repr
+                argument_key
             ))
 
             # If not, do the hard work

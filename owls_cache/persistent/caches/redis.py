@@ -81,12 +81,13 @@ class RedisPersistentCache(PersistentCache):
 
         Args:
             name: The name of the callable being cached
-            key: The argument key provided by the callable's cache mapper
+            key: A representation argument key provided by the callable's cache
+                mapper
 
         Returns:
             A (string) key suitable to use as the cache key.
         """
-        return '{0}({1})'.format(name, ', '.join((str(x) for x in key)))
+        return '{0}{1}'.format(name, key)
 
     def set(self, key, value):
         """Sets the cache value for a given key, overwriting any previous

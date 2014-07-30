@@ -57,7 +57,8 @@ class FileSystemPersistentCache(PersistentCache):
 
         Args:
             name: The name of the callable being cached
-            key: The argument key provided by the callable's cache mapper
+            key: A representation argument key provided by the callable's cache
+                mapper
 
         Returns:
             A (string) key suitable to use as the cache key.

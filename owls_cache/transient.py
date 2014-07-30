@@ -63,18 +63,12 @@ def cached(name, mapper):
             function name).  This value must be a string.  If None is provided,
             then caching is disabled for that call.
 
-    For caching to succeed, you must call the function with the same arg/kwarg
-    structure (i.e. you will get a cache miss if you use an argument as a
-    positional argument and then later as a keyword argument - this is
-    impossible to solve in the general case).
-
     Args:
         name: A unique name to use for the transient cache (note that this may
             be overridden by the `cache` keyword argument)
         mapper: A function which accepts the same arguments as the underlying
-            function and maps them to a tuple of representations (i.e. the
-            results of `repr`) or hashable values which should be used as the
-            cache key (usually calling repr on each argument is sufficient)
+            function and maps them to a tuple of values (which will be 'hashed'
+            using `repr`) to act as the cache key
 
     Returns:
         A cached version of the callable.
@@ -92,18 +86,14 @@ def cached(name, mapper):
                 del kwargs['cache']
 
             # Compute the cache key
-            key = mapper(*args, **kwargs)
-
-            # Compute a nice representation of the key assuming all key
-            # elements are `repr` results
-            key_repr = '({0})'.format(', '.join((str(x) for x in key)))
+            key = repr(mapper(*args, **kwargs))
 
             # Check if caching is disabled
             if cache_name is None:
                 _cache_log.debug(
                     'transient caching disabled in {0} for {1}'.format(
                         name,
-                        key_repr
+                        key
                     )
                 )
                 return f(*args, **kwargs)
@@ -123,7 +113,7 @@ def cached(name, mapper):
                 # Log the cache it
                 _cache_log.debug('transient cache hit in {0} for {1}'.format(
                     cache_name,
-                    key_repr
+                    key
                 ))
 
                 # All done
@@ -132,7 +122,7 @@ def cached(name, mapper):
             # Log the cache miss
             _cache_log.debug('transient cache miss in {0} for {1}'.format(
                 cache_name,
-                key_repr
+                key
             ))
 
             # If not, do the hard work
