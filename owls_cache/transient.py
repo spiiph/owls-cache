@@ -5,6 +5,25 @@
 # System imports
 from collections import defaultdict, OrderedDict
 from functools import wraps
+import logging
+
+# Six imports
+from six import iteritems
+
+
+# Global transient caching logger and disable debug by default
+_cache_log = logging.getLogger(__name__)
+_cache_log.setLevel(logging.INFO)
+
+
+def set_cache_debug(debug = True):
+    """Sets whether or not to print debugging information for transient cache
+    hits/misses.
+
+    Args:
+        debug: Whether or not to print debugging information
+    """
+    _cache_log.setLevel(logging.DEBUG if debug else logging.INFO)
 
 
 # Global size limits for caches
@@ -65,8 +84,19 @@ def cached(f):
         if 'cache' in kwargs:
             del kwargs['cache']
 
+        # Create a representation of the arguments which we can use for the
+        # cache key and also for debug logging
+        key_args = ', '.join((repr(a) for a in args))
+        key_kwargs = ', '.join(('{0}={1}'.format(k, repr(v))
+                                for k, v
+                                in iteritems(kwargs)))
+        if key_args != '' and key_kwargs != '':
+            key_args += ', '
+        call_repr = '{0}({1}{2})'.format(f.__name__, key_args, key_kwargs)
+
         # Check if caching is disabled
         if cache_name is None:
+            _cache_log.debug('caching disabled for %s', call_repr)
             return f(*args, **kwargs)
 
         # Grab the cache
@@ -76,12 +106,16 @@ def cached(f):
         cache_limit = _cache_limits[cache_name]
 
         # Compute the cache key
-        key = hash(repr(args) + repr(kwargs))
+        key = hash(call_repr)
 
         # Check if we have a cache hit
         result = cache.get(key)
         if result is not None:
+            _cache_log.debug('cache hit in %s for %s', cache_name, call_repr)
             return result
+
+        # Log the cache miss
+        _cache_log.debug('cache miss in %s for %s', cache_name, call_repr)
 
         # If not, do the hard work
         result = f(*args, **kwargs)
@@ -94,6 +128,7 @@ def cached(f):
         # Cache the value
         cache[key] = result
 
+        # All done
         return result
 
     # Return the wrapper function
