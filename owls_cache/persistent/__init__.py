@@ -1,7 +1,7 @@
 # System imports
-from os import environ
-from os.path import join
+import threading
 from functools import wraps
+from contextlib import contextmanager
 import logging
 
 
@@ -20,57 +20,32 @@ def set_cache_debug(debug = True):
     _cache_log.setLevel(logging.DEBUG if debug else logging.INFO)
 
 
-# Global persistent cache
-_persistent_cache = None
+# Create a thread-local variable to track the current persistent cache
+_thread_local = threading.local()
 
 
-def set_persistent_cache(cache):
-    """Sets the global persistent cache.
-
-    The global cache is used by persistently-cached methods which do not have a
-    persistent cache passed in via the 'cache' argument.  If the global cache
-    is unset (the default) and no 'cache' argument is provided, then no
-    persistent caching is performed.
-
-    Args:
-        cache: An instance of a subclass of
-            owls_cache.persistent.caches.PersistentCache
-    """
-    # Switch to the global variable
-    global _persistent_cache
-
-    # Set the cache
-    _persistent_cache = cache
+# Utility function to get the current thread's cache
+_get_cache = lambda: getattr(_thread_local, 'cache', None)
 
 
-def get_persistent_cache():
-    """Gets the global persistent cache.
-
-    Returns:
-        The global persistent cache, or None if the global cache is not set.
-    """
-    return _persistent_cache
+# Utility function to set the current thread's cache
+_set_cache = lambda cache: setattr(_thread_local, 'cache', cache)
 
 
-def cached(name, mapper):
+def cached(name,
+           mapper = lambda *args, **kwargs: args + tuple(iteritems(kwargs))):
     """Creates a persistently-cached version of a function.
 
-    The persistent cache to use for the function can be passed via the 'cache'
-    keyword argument.  If no cache is passed in this manner, then the global
-    persistent cache is used (if set), and if neither is available, no
-    persistent caching takes place.
-
-    The resulting function will take an additional keyword argument:
-
-        cache: An instance of a subclass of
-            owls_cache.persistent.caches.PersistentCache
+    If there is no cache associated with the current thread's context, then no
+    caching is performed.
 
     Args:
         name: A unique name by which to refer to the callable in the persistent
             cache
         mapper: A function which accepts the same arguments as the underlying
             function and maps them to a tuple of values (which will be 'hashed'
-            using `repr`) to act as the cache key
+            using `repr`) to act as the cache key (defaults to a function which
+            concatenates args and kwargs)
 
     Returns:
         A cached version of the callable.
@@ -80,24 +55,18 @@ def cached(name, mapper):
         # Create the wrapper function
         @wraps(f)
         def wrapper(*args, **kwargs):
-            # Extract keyword argument if specified
-            cache = kwargs.get('cache', get_persistent_cache())
-
-            # Mask this argument from the underlying function
-            if 'cache' in kwargs:
-                del kwargs['cache']
+            # Get the cache
+            cache = _get_cache()
 
             # Compute the argument key
             argument_key = repr(mapper(*args, **kwargs))
 
             # Check if caching is disabled
             if cache is None:
-                _cache_log.debug(
-                    'persistent caching disabled in {0} for {1}'.format(
-                        name,
-                        argument_key
-                    )
-                )
+                _cache_log.debug('caching disabled for {0} with {1}'.format(
+                    name,
+                    argument_key
+                ))
                 return f(*args, **kwargs)
 
             # Compute the cache key
@@ -106,16 +75,14 @@ def cached(name, mapper):
             # Check if we have a cache hit
             result = cache.get(key)
             if result is not None:
-                _cache_log.debug(
-                    'persistent cache hit in {0} for {1}'.format(
-                        name,
-                        argument_key
-                    )
-                )
+                _cache_log.debug('cache hit for {0} with {1}'.format(
+                    name,
+                    argument_key
+                ))
                 return result
 
             # Log the cache miss
-            _cache_log.debug('persistent cache miss in {0} for {1}'.format(
+            _cache_log.debug('cache miss for {0} with {1}'.format(
                 name,
                 argument_key
             ))
@@ -134,3 +101,27 @@ def cached(name, mapper):
 
     # Return the decorator
     return decorator
+
+
+@contextmanager
+def caching_into(cache):
+    """Provides a context manager for use with a `with` statement for control
+    of caching.
+
+    For example:
+
+        my_cache = FileSystemPersistentCache()
+        with caching_into(my_cache):
+            # Do operations....
+
+    Args:
+        cache: The persistent cache to use
+    """
+    # Set the cache
+    _set_cache(cache)
+
+    # Let code run
+    yield
+
+    # All done
+    _set_cache(None)

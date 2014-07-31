@@ -84,12 +84,10 @@ def cached(mapper = lambda *args, **kwargs: args + tuple(iteritems(kwargs))):
 
             # Check if caching is disabled
             if cache_name is None:
-                _cache_log.debug(
-                    'transient caching disabled for {0} with {1}'.format(
-                        f.__name__,
-                        key
-                    )
-                )
+                _cache_log.debug('caching disabled for {0} with {1}'.format(
+                    f.__name__,
+                    key
+                ))
                 return f(*args, **kwargs)
 
             # Grab the cache
@@ -102,25 +100,21 @@ def cached(mapper = lambda *args, **kwargs: args + tuple(iteritems(kwargs))):
                 cache[key] = cache.pop(key)
 
                 # Log the cache it
-                _cache_log.debug(
-                    'transient cache hit for {0} in {1} with {2}'.format(
-                        f.__name__,
-                        cache_name,
-                        key
-                    )
-                )
+                _cache_log.debug('cache hit for {0} in {1} with {2}'.format(
+                    f.__name__,
+                    cache_name,
+                    key
+                ))
 
                 # All done
                 return result
 
             # Log the cache miss
-            _cache_log.debug(
-                'transient cache miss for {0} in {1} with {2}'.format(
-                    f.__name__,
-                    cache_name,
-                    key
-                )
-            )
+            _cache_log.debug('cache miss for {0} in {1} with {2}'.format(
+                f.__name__,
+                cache_name,
+                key
+            ))
 
             # If not, do the hard work
             result = f(*args, **kwargs)
