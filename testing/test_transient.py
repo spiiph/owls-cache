@@ -2,12 +2,7 @@
 import unittest
 
 # owls-cache imports
-from owls_cache.transient import set_cache_limit, \
-    cached as transiently_cached, clear_transient_caches
-
-
-# Set transient cache limits, just for kicks
-set_cache_limit('abc', 2)
+from owls_cache.transient import cached
 
 
 class TestTransientBase(unittest.TestCase):
@@ -15,14 +10,14 @@ class TestTransientBase(unittest.TestCase):
         # Create a counter to check cache misses
         self._counter = 0
 
-    @transiently_cached('test_function',
-                        lambda s, a, b, o: (a, b, o))
+    @cached(lambda s, a, b, o: (a, b, o))
     def do_computation(self, a, b, operation = 'add'):
         self._counter += 1
         return (a + b) if operation == 'add' else (a - b)
 
     def tearDown(self):
-        clear_transient_caches()
+        # Clear all assocaited caches
+        self.do_computation.caches.clear()
 
 
 class TestTransientMiss(TestTransientBase):
