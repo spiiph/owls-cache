@@ -43,9 +43,12 @@ def cached(name,
         name: A unique name by which to refer to the callable in the persistent
             cache
         mapper: A function which accepts the same arguments as the underlying
-            function and maps them to a tuple of values (which will be 'hashed'
-            using `repr`) to act as the cache key (defaults to a function which
-            concatenates args and kwargs)
+            function and maps them to a hashable tuple of values, which will
+            then be hashed to act as the cache key.  If the argument types to
+            the underlying function are not hashable (e.g. they are lists or
+            dictionaries), then this function provides a mechanism by which to
+            convert them to hashable types (e.g. tuples).  Defaults to a
+            function which concatenates args and kwargs into a tuple.
 
     Returns:
         A cached version of the callable.
