@@ -54,8 +54,8 @@ def cached(mapper = lambda *args, **kwargs: args + tuple(iteritems(kwargs))):
 
     Args:
         mapper: A function which accepts the same arguments as the underlying
-            function and maps them to a tuple of values (which will be 'hashed'
-            using `repr`) to act as the cache key (defaults to a function which
+            function and maps them to a tuple of values, which will then be
+            hashed to act as the cache key (defaults to a function which
             concatenates args and kwargs)
 
     Returns:
@@ -80,7 +80,7 @@ def cached(mapper = lambda *args, **kwargs: args + tuple(iteritems(kwargs))):
                 del kwargs['cache_size']
 
             # Compute the cache key
-            key = repr(mapper(*args, **kwargs))
+            key = hash(mapper(*args, **kwargs))
 
             # Check if caching is disabled
             if cache_name is None:
