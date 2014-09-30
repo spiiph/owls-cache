@@ -58,34 +58,22 @@ def cached(name,
             # Get the cache
             cache = _get_cache()
 
-            # Compute the argument key
-            argument_key = repr(mapper(*args, **kwargs))
-
             # Check if caching is disabled
             if cache is None:
-                _cache_log.debug('caching disabled for {0} with {1}'.format(
-                    name,
-                    argument_key
-                ))
+                _cache_log.debug('caching disabled for {0}'.format(name))
                 return f(*args, **kwargs)
 
             # Compute the cache key
-            key = cache.key(name, argument_key)
+            key = hash((name, mapper(*args, **kwargs)))
 
             # Check if we have a cache hit
             result = cache.get(key)
             if result is not None:
-                _cache_log.debug('cache hit for {0} with {1}'.format(
-                    name,
-                    argument_key
-                ))
+                _cache_log.debug('cache hit for {0} in {1}'.format(key, name))
                 return result
 
             # Log the cache miss
-            _cache_log.debug('cache miss for {0} with {1}'.format(
-                name,
-                argument_key
-            ))
+            _cache_log.debug('cache miss for {0} in {1}'.format(key, name))
 
             # If not, do the hard work
             result = f(*args, **kwargs)

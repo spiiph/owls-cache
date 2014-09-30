@@ -11,24 +11,6 @@ class PersistentCache(object):
     implementations.
     """
 
-    def key(self, name, key):
-        """Return a string suitable for use as a cache key, based on the name
-        of the callable and the argument key provided by the callable.
-
-        Implementations need not override this method, as the given key should
-        be suitable in most cases.  Implementations may however wish to
-        override this method to provide more human-readable keys.
-
-        Args:
-            name: The name of the callable being cached
-            key: A representation argument key provided by the callable's cache
-                mapper
-
-        Returns:
-            A (string) key suitable to use as the cache key.
-        """
-        return str(hash(name) + hash(key))
-
     def set(self, key, value):
         """Sets the cache value for a given key, overwriting any previous
         value set for that key.
