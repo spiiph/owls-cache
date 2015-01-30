@@ -61,22 +61,34 @@ def cached(name,
             # Get the cache
             cache = _get_cache()
 
+            # Get the value which will be used as a key within this namespace
+            identifier = mapper(*args, **kwargs)
+
             # Check if caching is disabled
             if cache is None:
-                _cache_log.debug('caching disabled for {0}'.format(name))
+                _cache_log.debug('caching disabled for {0} in {1}'.format(
+                    identifier,
+                    name
+                ))
                 return f(*args, **kwargs)
 
             # Compute the cache key
-            key = hash((name, mapper(*args, **kwargs)))
+            key = hash((name, identifier))
 
             # Check if we have a cache hit
             result = cache.get(key)
             if result is not None:
-                _cache_log.debug('cache hit for {0} in {1}'.format(key, name))
+                _cache_log.debug('cache hit for {0} in {1}'.format(
+                    identifier,
+                    name
+                ))
                 return result
 
             # Log the cache miss
-            _cache_log.debug('cache miss for {0} in {1}'.format(key, name))
+            _cache_log.debug('cache miss for {0} in {1}'.format(
+                identifier,
+                name
+            ))
 
             # If not, do the hard work
             result = f(*args, **kwargs)

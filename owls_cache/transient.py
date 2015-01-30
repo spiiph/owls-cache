@@ -82,19 +82,22 @@ def cached(mapper = lambda *args, **kwargs: args + tuple(iteritems(kwargs))):
             if 'cache_size' in kwargs:
                 del kwargs['cache_size']
 
-            # Compute the cache key
-            key = hash(mapper(*args, **kwargs))
+            # Get the value which will be used as a key for this cache
+            identifier = mapper(*args, **kwargs)
 
             # Check if caching is disabled
             if cache_name is None:
-                _cache_log.debug('caching disabled for {0} with {1}'.format(
-                    f.__name__,
-                    key
+                _cache_log.debug('caching disabled for {0} in {1}'.format(
+                    identifier,
+                    f.__name__
                 ))
                 return f(*args, **kwargs)
 
             # Grab the cache
             cache = caches[cache_name]
+
+            # Compute the cache key
+            key = hash(identifier)
 
             # Check if we have a cache hit
             result = cache.get(key)
@@ -104,9 +107,9 @@ def cached(mapper = lambda *args, **kwargs: args + tuple(iteritems(kwargs))):
 
                 # Log the cache it
                 _cache_log.debug('cache hit for {0} in {1} with {2}'.format(
+                    identifier,
                     f.__name__,
-                    cache_name,
-                    key
+                    cache_name
                 ))
 
                 # All done
@@ -114,9 +117,9 @@ def cached(mapper = lambda *args, **kwargs: args + tuple(iteritems(kwargs))):
 
             # Log the cache miss
             _cache_log.debug('cache miss for {0} in {1} with {2}'.format(
+                identifier,
                 f.__name__,
-                cache_name,
-                key
+                cache_name
             ))
 
             # If not, do the hard work
