@@ -1,5 +1,6 @@
 # System imports
 import threading
+from six import iteritems
 from functools import wraps
 from contextlib import contextmanager
 import logging
