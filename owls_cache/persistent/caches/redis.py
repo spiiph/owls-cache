@@ -5,6 +5,7 @@
 # HACK: Use absolute_import behavior to get around module having the same name
 # as the global redis module
 from __future__ import absolute_import
+from __future__ import print_function
 
 # System imports
 import logging
@@ -37,16 +38,17 @@ class RedisPersistentCache(PersistentCache):
 
                 If None (the default), no prefix is used.
         """
-        # Check for a prefix arguments
-        prefix = kwargs.get('prefix', None)
+        # Check for a prefix argument
+        prefix = kwargs.pop('prefix', None)
         if prefix is None:
             self._prefix = ''
         else:
             self._prefix = '{0}-'.format(prefix)
 
-        # Mask the prefix argument from StrictRedis
-        if 'prefix' in kwargs:
-            kwargs.pop('prefix')
+        # Check for a debug argument
+        self._debug = kwargs.pop('debug', False)
+        if self._debug:
+            print('Redis: Debug messages on')
 
         # Store creation arguments for pickling
         self._args = args
@@ -78,6 +80,8 @@ class RedisPersistentCache(PersistentCache):
             key: The key to update
             value: The value to set
         """
+        if self._debug:
+            print('Redis: Cacheing {0}'.format(key))
         self._client.set(key, dumps(value))
 
     def get(self, key):
@@ -92,7 +96,11 @@ class RedisPersistentCache(PersistentCache):
         # Get the value, if any
         cache_value = self._client.get(key)
         if not cache_value:
+            if self._debug:
+                print('Redis: Cache miss for {0}'.format(key))
             return None
+        if self._debug:
+            print('Redis: Cache hit for {0}'.format(key))
 
         # Deserialize it
         return loads(cache_value)
