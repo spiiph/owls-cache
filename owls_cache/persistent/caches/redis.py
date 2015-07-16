@@ -45,11 +45,6 @@ class RedisPersistentCache(PersistentCache):
         else:
             self._prefix = '{0}-'.format(prefix)
 
-        # Check for a debug argument
-        self._debug = kwargs.pop('debug', False)
-        if self._debug:
-            print('Redis: Debug messages on')
-
         # Store creation arguments for pickling
         self._args = args
         self._kwargs = kwargs
@@ -80,8 +75,6 @@ class RedisPersistentCache(PersistentCache):
             key: The key to update
             value: The value to set
         """
-        if self._debug:
-            print('Redis: Cacheing {0}'.format(key))
         self._client.set(key, dumps(value))
 
     def get(self, key):
@@ -96,11 +89,7 @@ class RedisPersistentCache(PersistentCache):
         # Get the value, if any
         cache_value = self._client.get(key)
         if not cache_value:
-            if self._debug:
-                print('Redis: Cache miss for {0}'.format(key))
             return None
-        if self._debug:
-            print('Redis: Cache hit for {0}'.format(key))
 
         # Deserialize it
         return loads(cache_value)
