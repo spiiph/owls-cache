@@ -73,21 +73,31 @@ def cached(name,
                 ))
                 return f(*args, **kwargs)
 
+            # Compute the combined state of the identifiers
+            def identifier_or_state(iden):
+                try:
+                    return iden.state()
+                except:
+                    return iden
+            state = tuple((identifier_or_state(i) for i in identifier))
+
             # Compute the cache key
             key = hash((name, identifier))
 
             # Check if we have a cache hit
             result = cache.get(key)
             if result is not None:
-                _cache_log.debug('cache hit for {0} in {1}'.format(
-                    identifier,
-                    name
-                ))
+                # NOTE: Cache hits are almost always irrelevant. It's the
+                # misses we're after.
+                #_cache_log.debug('cache hit for {0} in {1}'.format(
+                    #state,
+                    #name
+                #))
                 return result
 
             # Log the cache miss
             _cache_log.debug('cache miss for {0} in {1}'.format(
-                identifier,
+                state,
                 name
             ))
 
