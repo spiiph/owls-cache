@@ -82,7 +82,11 @@ def cached(name,
             state = tuple((identifier_or_state(i) for i in identifier))
 
             # Compute the cache key
-            key = hash((name, identifier))
+            try:
+                key = hash((name, identifier))
+            except:
+                _cache_log.error('Failed to hash {0}'.format(state))
+                raise
 
             # Check if we have a cache hit
             result = cache.get(key)
