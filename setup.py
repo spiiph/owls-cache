@@ -17,7 +17,7 @@ owls_python_version_check()
 setup(
     # Basic installation information
     name = 'owls-cache',
-    version = '0.0.1',
+    version = '0.0.2',
     packages = find_packages(exclude = ['common', 'testing']),
 
     # Dependencies
@@ -28,10 +28,10 @@ setup(
     ],
 
     # Metadata for PyPI
-    author = 'Jacob Howard',
-    author_email = 'jacob@havoc.io',
+    author = 'Henrik Öhman',
+    author_email = 'speeph@gmail.com',
     description = 'Modular analysis toolkit - caching module',
     license = 'MIT',
     keywords = 'python big data analysis',
-    url = 'https://github.com/havoc-io/owls-cache'
+    url = 'https://github.com/spiiph/owls-cache'
 )

@@ -1,5 +1,11 @@
-# owls-cache
-
-[![Build Status](https://travis-ci.org/havoc-io/owls-cache.png?branch=master)](https://travis-ci.org/havoc-io/owls-cache)
+owls-cache
+==========
 
 The OWLS caching module
+
+Contributors
+============
+Jacob Howard <jacob@havoc.io> (Author)
+Henrik Öhman <speeph@gmail.com> (Maintainter)
+
+Distributed under the [MIT license](LICENSE)
