@@ -74,6 +74,9 @@ def cached(name,
                 return f(*args, **kwargs)
 
             # Compute the combined state of the identifiers
+            # TODO: Provide all identifiers to call to iden.state(); this
+            # would allow changing MC sample weights without affecting the
+            # data samples.
             def identifier_or_state(iden):
                 try:
                     return iden.state()
